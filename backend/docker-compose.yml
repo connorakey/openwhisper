@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openwhisper-backend
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - ollama
+
+    networks:
+      - openwhisper-network
+
+    restart: unless-stopped
+
+  # Ollama Service - Lightweight LLM provider
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+
+    networks:
+      - openwhisper-network
+
+    restart: unless-stopped
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+  # Optional: LM Studio service (uncomment if you prefer LM Studio instead of Ollama)
+  # lm-studio:
+  #   image: lm-studio:latest
+  #   container_name: lm-studio-server
+  #   ports:
+  #     - "1234:1234"
+  #   environment:
+  #     - LMS_HOST=0.0.0.0
+  #     - LMS_PORT=1234
+  #   networks:
+  #     - openwhisper-network
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ~/.lmstudio/models:/root/.lmstudio/models
+
+networks:
+  openwhisper-network:
+    driver: bridge
+
+volumes:
+  ollama_data:
+
