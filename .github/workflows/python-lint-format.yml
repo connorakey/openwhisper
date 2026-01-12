@@ -1,0 +1,75 @@
+name: Python Lint and Format
+
+on:
+  push:
+    paths:
+      - 'backend/**/*.py'
+  pull_request:
+    paths:
+      - 'backend/**/*.py'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        uv pip install --system pylint
+    
+    - name: Run pylint
+      run: |
+        pylint backend --recursive=y --ignore=.venv,__pycache__
+      continue-on-error: true
+
+  format:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    
+    - name: Install formatters
+      run: |
+        cd backend
+        uv pip install --system black isort
+    
+    - name: Format with black
+      run: |
+        black backend --exclude '/(\.venv|__pycache__|\.git)/'
+    
+    - name: Sort imports with isort
+      run: |
+        isort backend --skip .venv --skip __pycache__
+    
+    - name: Check for changes
+      id: verify_diff
+      run: |
+        git diff --exit-code || echo "formatted=true" >> $GITHUB_OUTPUT
+    
+    - name: Commit and push if changed
+      if: steps.verify_diff.outputs.formatted == 'true' && github.event_name == 'push'
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add -A
+        git commit -m "style: auto-format Python code with black and isort"
+        git push
