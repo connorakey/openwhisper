@@ -17,7 +17,7 @@ def _init_whisper():
         except ImportError:
             print("mlx_whisper not available, falling back to torch")
 
-    # Use faster_whisper for other systems
+    # Use faster_whisper for non apple silicon systems
     import torch
     from faster_whisper import WhisperModel
     device = "cuda" if torch.cuda.is_available() else "cpu"

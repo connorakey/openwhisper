@@ -45,7 +45,6 @@ def remove_disfluencies(text):
             "max_tokens": 2000
         }
 
-        # Increased timeout to 180 seconds to allow for model loading and processing
         response = requests.post(endpoint, json=payload, timeout=180)
         response.raise_for_status()
 
