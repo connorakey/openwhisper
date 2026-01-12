@@ -1,8 +1,9 @@
 import os
-import requests
 from enum import Enum
-from fastapi import APIRouter
+
+import requests
 from dotenv import load_dotenv
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 load_dotenv()
@@ -57,8 +58,5 @@ async def health() -> HealthResponse:
     overall_status = llm_provider_status  # Status is unhealthy only if LLM provider is unhealthy as if the request can be sent back this means the API is healthy
 
     return HealthResponse(
-        llm_provider=llm_provider_status,
-        api_status=api_status,
-        status=overall_status
+        llm_provider=llm_provider_status, api_status=api_status, status=overall_status
     )
-

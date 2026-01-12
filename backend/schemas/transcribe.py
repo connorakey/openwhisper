@@ -7,4 +7,3 @@ class TranscribeRequest(BaseModel):
 
 class TranscribeResponse(BaseModel):
     transcript: str
-

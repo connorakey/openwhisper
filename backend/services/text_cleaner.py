@@ -1,5 +1,6 @@
-import requests
 import os
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,10 +40,10 @@ def remove_disfluencies(text):
             "model": llm_model_name,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": text}
+                {"role": "user", "content": text},
             ],
             "temperature": 0.3,
-            "max_tokens": 2000
+            "max_tokens": 2000,
         }
 
         response = requests.post(endpoint, json=payload, timeout=180)
@@ -67,5 +68,3 @@ def remove_disfluencies(text):
         raise Exception(f"Error calling LLM API: {str(e)}")
     except (KeyError, IndexError) as e:
         raise Exception(f"Error parsing LLM response: {str(e)}")
-
-

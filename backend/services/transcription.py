@@ -1,7 +1,8 @@
+import base64
+import os
 import platform
 import tempfile
-import os
-import base64
+
 
 def _init_whisper():
     """Initialize the best Whisper engine based on the available hardware."""
@@ -9,9 +10,10 @@ def _init_whisper():
     machine = platform.machine()
 
     # Try MLX model for Apple Silicon
-    if system == 'Darwin' and machine == 'arm64':
+    if system == "Darwin" and machine == "arm64":
         try:
             import mlx_whisper
+
             print("Using mlx_whisper for Apple Silicon")
             return "mlx", None
         except ImportError:
@@ -20,13 +22,17 @@ def _init_whisper():
     # Use faster_whisper for non apple silicon systems
     import torch
     from faster_whisper import WhisperModel
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     compute_type = "float16" if device == "cuda" else "int8"
 
-    print("Using faster_whisper with device:", device, "and compute_type:", compute_type)
+    print(
+        "Using faster_whisper with device:", device, "and compute_type:", compute_type
+    )
 
     model = WhisperModel("large-v3", device=device, compute_type=compute_type)
     return "faster_whisper", model
+
 
 ENGINE, MODEL = _init_whisper()
 
@@ -35,9 +41,9 @@ def transcribe_audio(audio_path: str) -> str:
     """Transcribe audio file to text"""
     if ENGINE == "mlx":
         import mlx_whisper
+
         result = mlx_whisper.transcribe(
-            audio_path,
-            path_or_hf_repo="mlx-community/whisper-large-v3-mlx"
+            audio_path, path_or_hf_repo="mlx-community/whisper-large-v3-mlx"
         )
         return result["text"]
     else:
