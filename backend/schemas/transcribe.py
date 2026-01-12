@@ -6,6 +6,5 @@ class TranscribeRequest(BaseModel):
 
 
 class TranscribeResponse(BaseModel):
-    raw_transcript: str
-    cleaned_transcript: str
+    transcript: str
 
