@@ -49,7 +49,7 @@ async def health() -> HealthResponse:
     Health check endpoint that verifies the LLM server is running.
     Returns:
     - llm_provider: healthy/unhealthy based on server connectivity
-    - api_status: always healthy
+    - api_status: always healthy, because if this endpoint is reachable, the API is healthy
     - status: healthy if llm_provider is healthy, unhealthy otherwise
     """
     llm_provider_status = _get_llm_provider_status()
