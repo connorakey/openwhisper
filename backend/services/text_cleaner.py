@@ -45,16 +45,11 @@ def remove_disfluencies(text):
             "max_tokens": 2000
         }
 
-        print(f"[LLM] Calling endpoint: {endpoint}")
-        print(f"[LLM] Model: {llm_model_name}")
-        print(f"[LLM] Input length: {len(text)} chars")
-
         # Increased timeout to 180 seconds to allow for model loading and processing
         response = requests.post(endpoint, json=payload, timeout=180)
         response.raise_for_status()
 
         result = response.json()
-        print(f"[LLM] Response received: {result}")
 
         if llm_provider == "lm_studio":
             cleaned_text = result["choices"][0]["message"]["content"]
@@ -65,17 +60,13 @@ def remove_disfluencies(text):
 
         # Handle empty responses from LLM
         if not cleaned_text or cleaned_text.strip() == "":
-            print("[LLM] Warning: Received empty response, returning original text")
             return text
 
-        print(f"[LLM] Success! Output length: {len(cleaned_text)} chars")
         return cleaned_text.strip()
 
     except requests.exceptions.RequestException as e:
-        print(f"[LLM] Request error: {str(e)}")
         raise Exception(f"Error calling LLM API: {str(e)}")
     except (KeyError, IndexError) as e:
-        print(f"[LLM] Parsing error: {str(e)}")
         raise Exception(f"Error parsing LLM response: {str(e)}")
 
 
