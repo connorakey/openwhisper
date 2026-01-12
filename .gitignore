@@ -1,0 +1,75 @@
+# macOS / editors
+.DS_Store
+.AppleDouble
+.LSOverride
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+site-packages/
+*.egg-info/
+dist/
+build/
+.eggs/
+Pipfile.lock
+poetry.lock
+uv.lock
+
+# Environment / secrets
+.env
+.env.*
+*.env
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Docker
+*.pid
+docker-data/
+
+# Swift / Xcode / SwiftPM
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.xcuserdatad
+*.moved-aside
+project.xcworkspace/xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+
+# SwiftPM artifacts
+.build/
+.swiftpm/
+
+# iOS archives
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Ignore generated audio/test artifacts
+*.wav
+*.mp3
+*.m4a
+
