@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from services.transcription import transcribe_base64
 from schemas import TranscribeRequest, TranscribeResponse
+from services.text_cleaner import remove_disfluencies
 
 router = APIRouter()
 
@@ -12,11 +13,10 @@ async def transcribe(request: TranscribeRequest):
         raw_transcript = transcribe_base64(request.audio_base64)
 
         # TODO: Clean with LLM
-        cleaned_transcript = raw_transcript  # For now
+        cleaned_transcript = remove_disfluencies(raw_transcript)
 
         return TranscribeResponse(
-            raw_transcript=raw_transcript,
-            cleaned_transcript=cleaned_transcript
+            transcript=cleaned_transcript
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
