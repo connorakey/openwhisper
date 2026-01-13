@@ -68,6 +68,23 @@ project.xcworkspace/xcuserdata/
 *.dSYM
 *.dSYM.zip
 
+# macOS app specific
+macos-app/DerivedData/
+macos-app/.build/
+macos-app/*.app
+macos-app/*.dmg
+macos-app/*.pkg
+macos-app/build/
+macos-app/Carthage/
+macos-app/Pods/
+*.hmap
+*.ipa
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+iOSInjectionProject/
+
 # Ignore generated audio/test artifacts
 *.wav
 *.mp3
