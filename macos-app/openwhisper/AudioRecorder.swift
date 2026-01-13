@@ -15,6 +15,7 @@ class AudioRecorder: NSObject, ObservableObject {
     private var levelTimer: Timer?
     
     @Published var isRecording = false
+    @Published var isLoading = false
     @Published var audioLevel: Float = 0.0
     
     func startRecording() {
