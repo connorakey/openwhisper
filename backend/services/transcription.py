@@ -3,9 +3,22 @@ import os
 import platform
 import tempfile
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+transcription_provider = os.getenv("TRANSCRIPTION_PROVIDER", "local")
+cloud_api_base_url = os.getenv("CLOUD_API_BASE_URL")
+cloud_api_key = os.getenv("CLOUD_API_KEY")
+transcription_model_name = os.getenv("TRANSCRIPTION_MODEL_NAME", "whisper-large-v3")
+
 
 def _init_whisper():
     """Initialize the best Whisper engine based on the available hardware."""
+    # Skip initialization if using cloud provider
+    if transcription_provider == "cloud":
+        return "cloud", None
+
     system = platform.system()
     machine = platform.machine()
 
@@ -37,9 +50,45 @@ def _init_whisper():
 ENGINE, MODEL = _init_whisper()
 
 
+def _transcribe_cloud(audio_path: str) -> str:
+    """Transcribe audio using OpenAI-compatible API"""
+    import requests
+
+    if not cloud_api_key:
+        raise ValueError("CLOUD_API_KEY must be set when using cloud transcription provider")
+
+    # Prepare the endpoint URL
+    base_url = cloud_api_base_url.rstrip("/")
+    if not base_url.endswith("/audio/transcriptions"):
+        endpoint = f"{base_url}/audio/transcriptions"
+    else:
+        endpoint = base_url
+
+    # Prepare the request
+    headers = {
+        "Authorization": f"Bearer {cloud_api_key}"
+    }
+
+    with open(audio_path, "rb") as audio_file:
+        files = {
+            "file": audio_file
+        }
+        data = {
+            "model": transcription_model_name
+        }
+
+        response = requests.post(endpoint, headers=headers, files=files, data=data, timeout=180)
+        response.raise_for_status()
+
+        result = response.json()
+        return result["text"]
+
+
 def transcribe_audio(audio_path: str) -> str:
     """Transcribe audio file to text"""
-    if ENGINE == "mlx":
+    if ENGINE == "cloud":
+        return _transcribe_cloud(audio_path)
+    elif ENGINE == "mlx":
         import mlx_whisper
 
         result = mlx_whisper.transcribe(
@@ -65,3 +114,5 @@ def transcribe_base64(audio_base64: str) -> str:
         return transcribe_audio(temp_path)
     finally:
         os.unlink(temp_path)
+
+
