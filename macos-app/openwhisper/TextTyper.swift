@@ -16,6 +16,13 @@ class TextTyper {
     
     func typeText(_ text: String) {
         DispatchQueue.global(qos: .userInitiated).async {
+            // Ensure we're not the active app before typing
+            // This allows the text to be typed into the previously focused window
+            DispatchQueue.main.async {
+                NSApp.hide(nil)
+            }
+            
+            // Give time for the previous app to become active
             Thread.sleep(forTimeInterval: 0.3)
             
             let source = CGEventSource(stateID: .hidSystemState)
