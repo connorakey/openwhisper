@@ -10,7 +10,7 @@ llm_model_name = os.getenv("LLM_MODEL_NAME")
 cloud_api_base_url = os.getenv("CLOUD_API_BASE_URL")
 cloud_api_key = os.getenv("CLOUD_API_KEY")
 
-# Define the system prompt for disfluency removal, not recommended to modify
+# Define the system prompt for text cleaning task
 system_prompt = """You are a transcript cleaning system that removes disfluencies from spoken text.
 
 Your task:
@@ -42,7 +42,7 @@ Critical rules:
 Clean this transcript:"""
 
 
-def remove_disfluencies(text):
+def clean_text(text):
     """Sends the input text to an external AI model for disfluency removal."""
     if llm_provider == "lm_studio":
         api_url = os.getenv("LM_STUDIO_SERVER_URL")
