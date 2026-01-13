@@ -29,6 +29,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("🚀 App launched")
         
+        // Keep app in background (LSUIElement handles this but we reinforce it)
+        NSApp.setActivationPolicy(.accessory)
+        
         setupMenuBar()
         showSettingsWindow()
         requestPermissions()
@@ -103,6 +106,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+    
+    func showErrorNotification(title: String, message: String) {
+        let notification = NSUserNotification()
+        notification.title = title
+        notification.informativeText = message
+        notification.soundName = NSUserNotificationDefaultSoundName
+        
+        NSUserNotificationCenter.default.deliver(notification)
     }
     
     @objc func statusBarButtonClicked() {
@@ -204,9 +216,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         TextTyper.shared.typeText(transcript)
                     } else {
                         print("❌ Failed to parse transcript")
+                        self.showErrorNotification(
+                            title: "Transcription Failed",
+                            message: "Unable to parse the transcription response from the server."
+                        )
                     }
                 case .failure(let error):
                     print("❌ API Error: \(error)")
+                    self.showErrorNotification(
+                        title: "Connection Error",
+                        message: "Failed to connect to the transcription service:\n\n\(error.localizedDescription)"
+                    )
                 }
             }
         }
