@@ -33,7 +33,7 @@ poetry.lock
 uv.lock
 
 # Environment / secrets
-.env
+backend/.env
 .env.*
 *.env
 !.env.example
