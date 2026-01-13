@@ -42,8 +42,8 @@ Critical rules:
 Clean this transcript:"""
 
 
-def clean_text(text):
-    """Sends the input text to an external AI model for text cleaning"""
+def remove_disfluencies(text):
+    """Sends the input text to an external AI model for disfluency removal"""
     if llm_provider == "lm_studio":
         api_url = os.getenv("LM_STUDIO_SERVER_URL")
         api_port = os.getenv("LM_STUDIO_SERVER_PORT")

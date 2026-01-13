@@ -30,17 +30,31 @@ def _get_llm_provider_status() -> Status:
         api_url = os.getenv("LM_STUDIO_SERVER_URL")
         api_port = os.getenv("LM_STUDIO_SERVER_PORT")
         endpoint = f"{api_url}:{api_port}/v1/models"
+        try:
+            response = requests.get(endpoint, timeout=5)
+            return Status.HEALTHY if response.status_code == 200 else Status.UNHEALTHY
+        except requests.exceptions.RequestException:
+            return Status.UNHEALTHY
     elif llm_provider == "ollama":
         api_url = os.getenv("OLLAMA_SERVER_URL")
         api_port = os.getenv("OLLAMA_SERVER_PORT")
         endpoint = f"{api_url}:{api_port}/api/tags"
-    else:
-        return Status.UNHEALTHY
+        try:
+            response = requests.get(endpoint, timeout=5)
+            return Status.HEALTHY if response.status_code == 200 else Status.UNHEALTHY
+        except requests.exceptions.RequestException:
+            return Status.UNHEALTHY
+    elif llm_provider == "cloud":
+        # For cloud providers, just check if the API key is set
+        cloud_api_key = os.getenv("CLOUD_API_KEY")
+        cloud_api_base_url = os.getenv("CLOUD_API_BASE_URL")
 
-    try:
-        response = requests.get(endpoint, timeout=5)
-        return Status.HEALTHY if response.status_code == 200 else Status.UNHEALTHY
-    except requests.exceptions.RequestException:
+        if not cloud_api_key or not cloud_api_base_url:
+            return Status.UNHEALTHY
+
+        # Cloud provider is considered healthy if we have credentials configured
+        return Status.HEALTHY
+    else:
         return Status.UNHEALTHY
 
 
