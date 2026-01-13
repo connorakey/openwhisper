@@ -100,8 +100,9 @@ class AudioRecorder: NSObject, ObservableObject {
             
             self.audioRecorder?.updateMeters()
             let power = self.audioRecorder?.averagePower(forChannel: 0) ?? -160
-            let normalizedPower = max(0, min(1, pow(10, (power + 50) / 50)))
-            
+            // This makes the visualizer less sensitive and won't max out when speaking normally
+            let normalizedPower = max(0, min(1, (power + 40) / 40))
+
             DispatchQueue.main.async {
                 self.audioLevel = normalizedPower
             }
