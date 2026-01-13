@@ -15,6 +15,18 @@ class TextTyper {
     private init() {}
     
     func typeText(_ text: String) {
+        // First, check if we have accessibility permission
+        if !AXIsProcessTrusted() {
+            print("⚠️ Accessibility not trusted, attempting fallback via pasteboard")
+            typeUsingPasteboard(text)
+            return
+        }
+
+        // Use normal method if accessibility is available
+        typeViaAccessibility(text)
+    }
+
+    private func typeViaAccessibility(_ text: String) {
         DispatchQueue.global(qos: .userInitiated).async {
             // Ensure we're not the active app before typing
             // This allows the text to be typed into the previously focused window
@@ -34,6 +46,55 @@ class TextTyper {
         }
     }
     
+    private func typeUsingPasteboard(_ text: String) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Copy text to pasteboard
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(text, forType: .string)
+
+            // Hide our app
+            DispatchQueue.main.async {
+                NSApp.hide(nil)
+            }
+
+            // Wait for focus to change
+            Thread.sleep(forTimeInterval: 0.5)
+
+            // Try using AppleScript to paste
+            let script = "tell application \"System Events\" to keystroke \"v\" using command down"
+            var error: NSDictionary?
+
+            if let scriptObject = NSAppleScript(source: script) {
+                scriptObject.executeAndReturnError(&error)
+                if error == nil {
+                    print("📋 Text pasted via AppleScript")
+                    return
+                }
+            }
+
+            // If AppleScript fails, try with a small delay and try again
+            Thread.sleep(forTimeInterval: 0.3)
+
+            // Try with IO Kit method as last resort
+            let source = CGEventSource(stateID: .hidSystemState)
+            let vKeyCode: CGKeyCode = 9 // V key
+
+            // Press and release Cmd+V without needing accessibility
+            if let event = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: true) {
+                event.flags = [.maskCommand]
+                event.post(tap: .cghidEventTap)
+                Thread.sleep(forTimeInterval: 0.1)
+            }
+
+            if let event = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: false) {
+                event.post(tap: .cghidEventTap)
+            }
+
+            print("📋 Text pasted via clipboard (IO method)")
+        }
+    }
+
     private func typeCharacter(_ char: Character, source: CGEventSource?) {
         if let keyInfo = getKeyCode(for: char) {
             let keyCode = keyInfo.0
