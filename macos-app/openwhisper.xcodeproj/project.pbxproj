@@ -442,15 +442,21 @@
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>1</string>
 				<key>ENABLE_APP_SANDBOX</key>
-				<string>YES</string>
+				<string>NO</string>
 				<key>ENABLE_PREVIEWS</key>
 				<string>YES</string>
 				<key>ENABLE_USER_SELECTED_FILES</key>
 				<string>readonly</string>
 				<key>GENERATE_INFOPLIST_FILE</key>
 				<string>YES</string>
+				<key>INFOPLIST_KEY_LSUIElement</key>
+				<string>YES</string>
+				<key>INFOPLIST_KEY_NSAppleEventsUsageDescription</key>
+				<string>OpenWhisper needs accessibility access to detect global hotkeys and automatically type transcribed text.</string>
 				<key>INFOPLIST_KEY_NSHumanReadableCopyright</key>
 				<string></string>
+				<key>INFOPLIST_KEY_NSMicrophoneUsageDescription</key>
+				<string>OpenWhisper needs microphone access to record audio for transcription.</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>
@@ -497,15 +503,21 @@
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>1</string>
 				<key>ENABLE_APP_SANDBOX</key>
-				<string>YES</string>
+				<string>NO</string>
 				<key>ENABLE_PREVIEWS</key>
 				<string>YES</string>
 				<key>ENABLE_USER_SELECTED_FILES</key>
 				<string>readonly</string>
 				<key>GENERATE_INFOPLIST_FILE</key>
 				<string>YES</string>
+				<key>INFOPLIST_KEY_LSUIElement</key>
+				<string>YES</string>
+				<key>INFOPLIST_KEY_NSAppleEventsUsageDescription</key>
+				<string>OpenWhisper needs accessibility access to detect global hotkeys and automatically type transcribed text.</string>
 				<key>INFOPLIST_KEY_NSHumanReadableCopyright</key>
 				<string></string>
+				<key>INFOPLIST_KEY_NSMicrophoneUsageDescription</key>
+				<string>OpenWhisper needs microphone access to record audio for transcription.</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>

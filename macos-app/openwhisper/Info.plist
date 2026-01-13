@@ -6,7 +6,16 @@
 	<string>OpenWhisper needs microphone access to record audio for transcription.</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>OpenWhisper needs accessibility access to detect global hotkeys and automatically type transcribed text.</string>
+	<key>NSUserNotificationAlertStyle</key>
+	<string>alert</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
