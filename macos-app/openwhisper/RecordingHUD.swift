@@ -13,19 +13,40 @@ struct RecordingHUD: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Recording...")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            AudioVisualizerView(audioLevel: audioRecorder.audioLevel, animationPhase: animationPhase, colorScheme: colorScheme)
-                .frame(width: 300, height: 60)
-            
-            Text("Hold key to record")
-                .font(.caption)
-                .foregroundColor(.secondary)
+        VStack(spacing: 16) {
+            if audioRecorder.isLoading {
+                VStack(spacing: 12) {
+                    Text("Processing...")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    ProgressView()
+                        .scaleEffect(1.2, anchor: .center)
+                        .frame(height: 60)
+
+                    Text("Transcribing audio...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            } else {
+                VStack(spacing: 12) {
+                    Text("Recording...")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    AudioVisualizerView(audioLevel: audioRecorder.audioLevel, animationPhase: animationPhase, colorScheme: colorScheme)
+                        .frame(width: 300, height: 60)
+
+                    Text("Hold key to record")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            }
         }
-        .padding(30)
+        .frame(height: 140)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(.ultraThinMaterial)
@@ -71,7 +92,7 @@ struct VisualizerBar: View {
         let normalizedIndex = CGFloat(index) / CGFloat(barCount)
         let wave = sin((normalizedIndex + animationPhase) * .pi * 4)
         let baseHeight = 0.3 + abs(wave * 0.25)
-        let audioComponent = CGFloat(audioLevel) * 0.8
+        let audioComponent = CGFloat(audioLevel) * 0.3
         return min(baseHeight + audioComponent, 1.0)
     }
     
