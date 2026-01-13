@@ -813,15 +813,49 @@ OLLAMA_SERVER_PORT=11434
 LM_STUDIO_SERVER_URL=
 LM_STUDIO_SERVER_PORT=
 
-# LLM Provider selection
+# LLM Provider selection (ollama, lm_studio, or cloud)
 LLM_PROVIDER=ollama
 
 # Model name
 LLM_MODEL_NAME=llama2
 
+# Cloud API Configuration (for OpenAI-compatible APIs)
+# Only needed if using 'cloud' provider for LLM or transcription
+CLOUD_API_BASE_URL=https://api.openai.com/v1
+CLOUD_API_KEY=your_api_key_here
+
+# Transcription Provider (local or cloud)
+TRANSCRIPTION_PROVIDER=local
+# Model name for cloud transcription (whisper-large-v3 is default, OpenAI uses whisper-1)
+TRANSCRIPTION_MODEL_NAME=whisper-large-v3
+
 # Authorization token (generate with: openssl rand -hex 32)
 API_AUTH_TOKEN=your_secure_token_here
 ```
+
+### Configuration Options
+
+#### LLM Provider Options
+- **`ollama`**: Use local Ollama server for text cleaning
+- **`lm_studio`**: Use LM Studio server for text cleaning
+- **`cloud`**: Use any OpenAI-compatible API for text cleaning (OpenAI, Together AI, OpenRouter, Azure OpenAI, etc.)
+
+#### Transcription Provider Options
+- **`local`**: Use local Whisper models (mlx_whisper for Apple Silicon, faster-whisper for other systems)
+- **`cloud`**: Use OpenAI-compatible transcription API (OpenAI Whisper API, Groq, etc.)
+
+#### Cloud API Configuration
+When using `cloud` for either LLM_PROVIDER or TRANSCRIPTION_PROVIDER, you need to configure:
+- **`CLOUD_API_BASE_URL`**: The base URL of your OpenAI-compatible API (e.g., `https://api.openai.com/v1`)
+- **`CLOUD_API_KEY`**: Your API key for authentication
+
+**Supported Cloud Providers:**
+- OpenAI (https://api.openai.com/v1)
+- Together AI (https://api.together.xyz/v1)
+- OpenRouter (https://openrouter.ai/api/v1)
+- Azure OpenAI (https://YOUR_RESOURCE.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT)
+- Groq (https://api.groq.com/openai/v1)
+- Any other OpenAI-compatible API
 
 ## Using Different LLM Providers
 
@@ -915,6 +949,133 @@ If you have Ollama or LM Studio running on a remote machine:
    LLM_PROVIDER=lm_studio
    ```
 
+### Using Cloud APIs (OpenAI-Compatible)
+
+OpenWhisper now supports using any OpenAI-compatible API for both transcription and text cleaning. This allows you to use cloud providers like OpenAI, Together AI, OpenRouter, Groq, and more.
+
+#### Using Cloud API for Text Cleaning (LLM)
+
+To use a cloud API for text cleaning/disfluency removal:
+
+1. Update your `.env` file:
+   ```dotenv
+   # Set LLM provider to cloud
+   LLM_PROVIDER=cloud
+   
+   # Specify the model name (e.g., gpt-4, gpt-3.5-turbo, claude-3-opus, etc.)
+   LLM_MODEL_NAME=gpt-3.5-turbo
+   
+   # Configure cloud API settings
+   CLOUD_API_BASE_URL=https://api.openai.com/v1
+   CLOUD_API_KEY=sk-your-api-key-here
+   
+   # Keep transcription local if desired
+   TRANSCRIPTION_PROVIDER=local
+   ```
+
+2. Restart the backend service
+
+**Example configurations for different providers:**
+
+**OpenAI:**
+```dotenv
+CLOUD_API_BASE_URL=https://api.openai.com/v1
+CLOUD_API_KEY=sk-your-openai-key
+LLM_MODEL_NAME=gpt-3.5-turbo
+```
+
+**Together AI:**
+```dotenv
+CLOUD_API_BASE_URL=https://api.together.xyz/v1
+CLOUD_API_KEY=your-together-key
+LLM_MODEL_NAME=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+```
+
+**OpenRouter:**
+```dotenv
+CLOUD_API_BASE_URL=https://openrouter.ai/api/v1
+CLOUD_API_KEY=sk-or-your-openrouter-key
+LLM_MODEL_NAME=anthropic/claude-3-opus
+```
+
+**Groq:**
+```dotenv
+CLOUD_API_BASE_URL=https://api.groq.com/openai/v1
+CLOUD_API_KEY=gsk_your-groq-key
+LLM_MODEL_NAME=llama-3.1-70b-versatile
+```
+
+#### Using Cloud API for Transcription
+
+To use a cloud API for transcription (instead of local Whisper):
+
+1. Update your `.env` file:
+   ```dotenv
+   # Set transcription provider to cloud
+   TRANSCRIPTION_PROVIDER=cloud
+   
+   # Specify the transcription model (whisper-large-v3 is default, OpenAI uses whisper-1)
+   TRANSCRIPTION_MODEL_NAME=whisper-large-v3
+   
+   # Configure cloud API settings
+   CLOUD_API_BASE_URL=https://api.openai.com/v1
+   CLOUD_API_KEY=sk-your-api-key-here
+   
+   # Keep text cleaning local or cloud as desired
+   LLM_PROVIDER=ollama
+   LLM_MODEL_NAME=llama2
+   ```
+
+2. Restart the backend service
+
+**Example configurations for different transcription providers:**
+
+**OpenAI Whisper:**
+```dotenv
+CLOUD_API_BASE_URL=https://api.openai.com/v1
+CLOUD_API_KEY=sk-your-openai-key
+TRANSCRIPTION_MODEL_NAME=whisper-1
+```
+
+**Groq Whisper:**
+```dotenv
+CLOUD_API_BASE_URL=https://api.groq.com/openai/v1
+CLOUD_API_KEY=gsk_your-groq-key
+TRANSCRIPTION_MODEL_NAME=whisper-large-v3
+```
+
+#### Using Cloud for Both Services
+
+You can use cloud APIs for both transcription and text cleaning:
+
+```dotenv
+# Transcription settings
+TRANSCRIPTION_PROVIDER=cloud
+TRANSCRIPTION_MODEL_NAME=whisper-large-v3
+
+# Text cleaning settings
+LLM_PROVIDER=cloud
+LLM_MODEL_NAME=gpt-3.5-turbo
+
+# Shared cloud API settings
+CLOUD_API_BASE_URL=https://api.openai.com/v1
+CLOUD_API_KEY=sk-your-api-key-here
+```
+
+#### Benefits of Cloud APIs
+
+- **No local GPU required**: Run on any machine without powerful hardware
+- **Faster processing**: Cloud APIs often provide faster inference
+- **No model downloads**: No need to download large model files
+- **Scalability**: Easy to scale without managing infrastructure
+- **Cost-effective**: Pay only for what you use
+
+#### Considerations
+
+- **Privacy**: Audio and text data is sent to third-party services
+- **Costs**: Cloud APIs charge per request (check pricing for your provider)
+- **Internet dependency**: Requires stable internet connection
+- **Latency**: Network round-trip may add latency compared to local processing
 3. Ensure the remote server is accessible from your Docker network (firewall rules, network connectivity, etc.)
 
 ## Building and Running

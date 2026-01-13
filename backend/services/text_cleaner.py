@@ -7,6 +7,8 @@ load_dotenv()
 
 llm_provider = os.getenv("LLM_PROVIDER")
 llm_model_name = os.getenv("LLM_MODEL_NAME")
+cloud_api_base_url = os.getenv("CLOUD_API_BASE_URL")
+cloud_api_key = os.getenv("CLOUD_API_KEY")
 
 # Define the system prompt for disfluency removal, not recommended to modify
 system_prompt = (
@@ -32,6 +34,13 @@ def remove_disfluencies(text):
         api_url = os.getenv("OLLAMA_SERVER_URL")
         api_port = os.getenv("OLLAMA_SERVER_PORT")
         endpoint = f"{api_url}:{api_port}/api/chat"
+    elif llm_provider == "cloud":
+        # Ensure base URL ends with /chat/completions for OpenAI-compatible APIs
+        base_url = cloud_api_base_url.rstrip("/")
+        if not base_url.endswith("/chat/completions"):
+            endpoint = f"{base_url}/chat/completions"
+        else:
+            endpoint = base_url
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
@@ -46,12 +55,19 @@ def remove_disfluencies(text):
             "max_tokens": 2000,
         }
 
-        response = requests.post(endpoint, json=payload, timeout=180)
+        headers = {}
+        if llm_provider == "cloud":
+            if not cloud_api_key:
+                raise ValueError("CLOUD_API_KEY must be set when using cloud provider")
+            headers["Authorization"] = f"Bearer {cloud_api_key}"
+            headers["Content-Type"] = "application/json"
+
+        response = requests.post(endpoint, json=payload, headers=headers, timeout=180)
         response.raise_for_status()
 
         result = response.json()
 
-        if llm_provider == "lm_studio":
+        if llm_provider == "lm_studio" or llm_provider == "cloud":
             cleaned_text = result["choices"][0]["message"]["content"]
         elif llm_provider == "ollama":
             cleaned_text = result["message"]["content"]
@@ -68,3 +84,5 @@ def remove_disfluencies(text):
         raise Exception(f"Error calling LLM API: {str(e)}")
     except (KeyError, IndexError) as e:
         raise Exception(f"Error parsing LLM response: {str(e)}")
+
+
