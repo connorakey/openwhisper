@@ -85,14 +85,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("♿ Accessibility permission: \(trusted)")
         
         if !trusted {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                self.showPermissionAlert(
-                    title: "Accessibility Access Required",
-                    message: "OpenWhisper needs accessibility access for:\n\n• Global hotkey detection\n• Automatic text typing\n\nPlease grant access in System Settings → Privacy & Security → Accessibility, then restart the app."
-                )
-                
-                let prefpaneUrl = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                NSWorkspace.shared.open(prefpaneUrl)
+            // Try to enable accessibility API
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
+            let enabled = AXIsProcessTrustedWithOptions(options as CFDictionary)
+            print("♿ After prompt - Accessibility enabled: \(enabled)")
+
+            if !enabled {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    self.showPermissionAlert(
+                        title: "Accessibility Access Required",
+                        message: "OpenWhisper needs accessibility access for:\n\n• Global hotkey detection\n• Automatic text typing\n\nPlease grant access in System Settings → Privacy & Security → Accessibility, then restart the app."
+                    )
+
+                    let prefpaneUrl = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+                    NSWorkspace.shared.open(prefpaneUrl)
+                }
             }
         }
     }
@@ -179,8 +186,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func stopRecording() {
         print("⏹️ STOP RECORDING CALLED")
-        hudWindowController?.hide()
-        
+
         audioRecorder.stopRecording { base64Audio, audioFileURL in
             print("📦 stopRecording callback - hasAudio: \(base64Audio != nil), hasURL: \(audioFileURL != nil)")
             
@@ -189,12 +195,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 if let url = audioFileURL {
                     try? FileManager.default.removeItem(at: url)
                 }
+                self.hudWindowController?.hide()
                 return
             }
             
             print("✅ Got base64 audio, length: \(base64Audio.count)")
             let settings = SettingsManager.shared
             
+            // Show loading state
+            DispatchQueue.main.async {
+                self.audioRecorder.isLoading = true
+            }
+
             print("🌐 Sending to API: \(settings.apiUrl)")
             APIService.shared.sendTranscriptionRequest(
                 audioBase64: base64Audio,
@@ -206,9 +218,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     print("🗑️ Deleted temp file")
                 }
                 
+                // Hide loading state and hide the HUD
+                DispatchQueue.main.async {
+                    self.audioRecorder.isLoading = false
+                    self.hudWindowController?.hide()
+                }
+
                 switch result {
                 case .success(let response):
                     print("✅ API Response: \(response)")
+                    // Check accessibility before attempting to type
+                    let isTrusted = AXIsProcessTrusted()
+                    print("♿ Accessibility trusted before typing: \(isTrusted)")
+
+                    if !isTrusted {
+                        self.showErrorNotification(
+                            title: "Accessibility Permission Missing",
+                            message: "OpenWhisper has lost accessibility permission. Please restart the app and grant accessibility access in System Settings → Privacy & Security → Accessibility."
+                        )
+                        return
+                    }
+
                     if let data = response.data(using: .utf8),
                        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let transcript = json["transcript"] as? String {
