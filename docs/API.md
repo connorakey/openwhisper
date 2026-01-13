@@ -1035,6 +1035,8 @@ To use a cloud API for transcription (instead of local Whisper):
 CLOUD_API_BASE_URL=https://api.openai.com/v1
 CLOUD_API_KEY=sk-your-openai-key
 TRANSCRIPTION_MODEL_NAME=whisper-1
+TRANSCRIPTION_TEMPERATURE=0
+TRANSCRIPTION_VAD_MODEL=
 ```
 
 **Groq Whisper:**
@@ -1042,6 +1044,17 @@ TRANSCRIPTION_MODEL_NAME=whisper-1
 CLOUD_API_BASE_URL=https://api.groq.com/openai/v1
 CLOUD_API_KEY=gsk_your-groq-key
 TRANSCRIPTION_MODEL_NAME=whisper-large-v3
+TRANSCRIPTION_TEMPERATURE=0
+TRANSCRIPTION_VAD_MODEL=
+```
+
+**Fireworks AI Whisper:**
+```dotenv
+CLOUD_API_BASE_URL=https://audio-prod.api.fireworks.ai/v1
+CLOUD_API_KEY=fw_your-fireworks-key
+TRANSCRIPTION_MODEL_NAME=whisper-v3
+TRANSCRIPTION_TEMPERATURE=0
+TRANSCRIPTION_VAD_MODEL=silero
 ```
 
 #### Using Cloud for Both Services
