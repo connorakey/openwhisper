@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "openwhisper"
 version = "0.1.0"
@@ -13,3 +17,8 @@ dependencies = [
     "torch>=2.8.0",
     "uvicorn>=0.39.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["routes*", "schemas*", "services*"]
+
