@@ -102,5 +102,3 @@ def clean_text(text):
         raise Exception(f"Error calling LLM API: {str(e)}")
     except (KeyError, IndexError) as e:
         raise Exception(f"Error parsing LLM response: {str(e)}")
-
-

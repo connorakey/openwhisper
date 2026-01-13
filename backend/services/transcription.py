@@ -55,7 +55,9 @@ def _transcribe_cloud(audio_path: str) -> str:
     import requests
 
     if not cloud_api_key:
-        raise ValueError("CLOUD_API_KEY must be set when using cloud transcription provider")
+        raise ValueError(
+            "CLOUD_API_KEY must be set when using cloud transcription provider"
+        )
 
     # Prepare the endpoint URL
     base_url = cloud_api_base_url.rstrip("/")
@@ -65,19 +67,15 @@ def _transcribe_cloud(audio_path: str) -> str:
         endpoint = base_url
 
     # Prepare the request
-    headers = {
-        "Authorization": f"Bearer {cloud_api_key}"
-    }
+    headers = {"Authorization": f"Bearer {cloud_api_key}"}
 
     with open(audio_path, "rb") as audio_file:
-        files = {
-            "file": audio_file
-        }
-        data = {
-            "model": transcription_model_name
-        }
+        files = {"file": audio_file}
+        data = {"model": transcription_model_name}
 
-        response = requests.post(endpoint, headers=headers, files=files, data=data, timeout=180)
+        response = requests.post(
+            endpoint, headers=headers, files=files, data=data, timeout=180
+        )
         response.raise_for_status()
 
         result = response.json()
@@ -114,5 +112,3 @@ def transcribe_base64(audio_base64: str) -> str:
         return transcribe_audio(temp_path)
     finally:
         os.unlink(temp_path)
-
-
