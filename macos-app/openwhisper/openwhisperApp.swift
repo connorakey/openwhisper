@@ -27,8 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let audioRecorder = AudioRecorder()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("🚀 App launched")
-        
         // Keep app in background (LSUIElement handles this but we reinforce it)
         NSApp.setActivationPolicy(.accessory)
         
@@ -39,7 +37,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        print("❌ Prevented termination - app stays in menu bar")
+        print("Prevented termination - app stays in menu bar")
         return .terminateCancel
     }
     
@@ -48,7 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func setupMenuBar() {
-        print("📍 Setting up menu bar")
+        print("Setting up menu bar")
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem?.button {
@@ -56,7 +54,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(statusBarButtonClicked)
             button.target = self
         }
-        print("✅ Menu bar icon created")
     }
     
     func requestPermissions() {
@@ -68,7 +65,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func requestMicrophonePermission() {
         AVCaptureDevice.requestAccess(for: .audio) { granted in
-            print("🎤 Microphone permission: \(granted)")
             if !granted {
                 DispatchQueue.main.async {
                     self.showPermissionAlert(
@@ -82,13 +78,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func requestAccessibilityPermission() {
         let trusted = AXIsProcessTrusted()
-        print("♿ Accessibility permission: \(trusted)")
-        
+
         if !trusted {
             // Try to enable accessibility API
             let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
             let enabled = AXIsProcessTrustedWithOptions(options as CFDictionary)
-            print("♿ After prompt - Accessibility enabled: \(enabled)")
 
             if !enabled {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
@@ -125,12 +119,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func statusBarButtonClicked() {
-        print("🖱️ Menu bar icon clicked")
+        print("Menu bar icon clicked")
         showSettingsWindow()
     }
     
     func showSettingsWindow() {
-        print("🪟 Showing settings window")
+        print("Showing settings window")
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         
@@ -152,7 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func setupHotkey() {
-        print("⌨️ Setting up hotkey")
+        print("Setting up hotkey")
         let settings = SettingsManager.shared
         
         HotkeyManager.shared.onHotKeyPressed = { [weak self] in
@@ -174,24 +168,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func startRecording() {
-        print("🎤 START RECORDING CALLED")
+        print("START RECORDING CALLED")
         if hudWindowController == nil {
             hudWindowController = HUDWindowController(audioRecorder: audioRecorder)
         }
         
         hudWindowController?.show()
         audioRecorder.startRecording()
-        print("🎤 Recording started, isRecording: \(audioRecorder.isRecording)")
+        print("Recording started, isRecording: \(audioRecorder.isRecording)")
     }
     
     func stopRecording() {
-        print("⏹️ STOP RECORDING CALLED")
+        print("STOP RECORDING CALLED")
 
         audioRecorder.stopRecording { base64Audio, audioFileURL in
-            print("📦 stopRecording callback - hasAudio: \(base64Audio != nil), hasURL: \(audioFileURL != nil)")
+            print("stopRecording callback - hasAudio: \(base64Audio != nil), hasURL: \(audioFileURL != nil)")
             
             guard let base64Audio = base64Audio else {
-                print("❌ No audio data received")
+                print("No audio data received")
                 if let url = audioFileURL {
                     try? FileManager.default.removeItem(at: url)
                 }
@@ -199,7 +193,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return
             }
             
-            print("✅ Got base64 audio, length: \(base64Audio.count)")
+            print("Got base64 audio, length: \(base64Audio.count)")
             let settings = SettingsManager.shared
             
             // Show loading state
@@ -207,7 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self.audioRecorder.isLoading = true
             }
 
-            print("🌐 Sending to API: \(settings.apiUrl)")
+            print("Sending to API: \(settings.apiUrl)")
             APIService.shared.sendTranscriptionRequest(
                 audioBase64: base64Audio,
                 apiUrl: settings.apiUrl,
@@ -215,7 +209,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             ) { result in
                 if let url = audioFileURL {
                     try? FileManager.default.removeItem(at: url)
-                    print("🗑️ Deleted temp file")
+                    print("Deleted temp file")
                 }
                 
                 // Hide loading state and hide the HUD
@@ -226,10 +220,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                 switch result {
                 case .success(let response):
-                    print("✅ API Response: \(response)")
+                    print("API Response: \(response)")
                     // Check accessibility before attempting to type
                     let isTrusted = AXIsProcessTrusted()
-                    print("♿ Accessibility trusted before typing: \(isTrusted)")
+                    print("Accessibility trusted before typing: \(isTrusted)")
 
                     if !isTrusted {
                         self.showErrorNotification(
@@ -242,17 +236,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if let data = response.data(using: .utf8),
                        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let transcript = json["transcript"] as? String {
-                        print("⌨️ Typing transcript: \(transcript)")
+                        print("Typing transcript: \(transcript)")
                         TextTyper.shared.typeText(transcript)
                     } else {
-                        print("❌ Failed to parse transcript")
+                        print("Failed to parse transcript")
                         self.showErrorNotification(
                             title: "Transcription Failed",
                             message: "Unable to parse the transcription response from the server."
                         )
                     }
                 case .failure(let error):
-                    print("❌ API Error: \(error)")
+                    print("API Error: \(error)")
                     self.showErrorNotification(
                         title: "Connection Error",
                         message: "Failed to connect to the transcription service:\n\n\(error.localizedDescription)"
@@ -265,7 +259,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
-        print("🪟 Window closing")
         NSApp.setActivationPolicy(.accessory)
         
         if let window = notification.object as? NSWindow {
