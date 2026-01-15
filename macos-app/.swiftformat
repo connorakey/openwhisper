@@ -1,0 +1,41 @@
+# SwiftFormat Configuration
+
+# Format options
+--indent 4
+--indentcase false
+--trimwhitespace always
+--allman false
+--commas always
+--decimalgrouping 3,6
+--exponentcase lowercase
+--fractiongrouping disabled
+--hexgrouping 4,8
+--octalgrouping 4,8
+--ranges spaced
+--semicolons inline
+--stripunusedargs always
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+
+# Rules
+--enable isEmpty
+--enable sortedImports
+--enable duplicateImports
+--enable blankLinesAtStartOfScope
+--enable blankLinesAtEndOfScope
+--enable blankLinesBetweenScopes
+--enable consecutiveSpaces
+--enable redundantParens
+--enable redundantGet
+--enable redundantNilInit
+--enable redundantSelf
+--enable trailingCommas
+--enable typeSugar
+--enable void
+--enable wrap
+
+# Excluded paths
+--exclude build
+--exclude .build
+--exclude Pods
